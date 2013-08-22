@@ -19,8 +19,15 @@ module Nerve
     def start()
       log.info "nerve: waiting to connect to zookeeper at #{@path}"
       @zk = ZK.new(@path)
-
       log.info "nerve: successfully created zk connection to #{@path}"
+
+      # Get rid of the ephemeral node we don't own,
+      # could be left from a recent crash
+      begin
+        @zk.delete(@key)
+        log.info "nerve: removed stale node #{@key}"
+      rescue ZK::Exceptions::NoNode => e
+      end
     end
 
     def report_up()
