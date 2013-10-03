@@ -47,6 +47,10 @@ module Nerve
       return @zk.ping?
     end
 
+    def close!
+      @zk.close!
+    end
+
     private
 
     def zk_delete

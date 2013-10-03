@@ -15,8 +15,11 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.require_paths = ["lib"]
 
   gem.add_runtime_dependency "zk", "~> 1.9.2"
   gem.add_runtime_dependency "bunny", "= 1.0.0.rc2"
+
+  gem.add_dependency 'slyphon-log4j'
+  gem.add_dependency 'slyphon-zookeeper_jar'
+  gem.add_dependency 'eventmachine'
 end
