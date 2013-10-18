@@ -16,13 +16,13 @@ module Nerve
       @key.insert(0,'/') unless @key[0] == '/'
     end
 
-    def start()
+    def start
       log.info "nerve: waiting to connect to zookeeper at #{@path}"
       @zk = ZK.new(@path)
       log.info "nerve: successfully created zk connection to #{@path}"
     end
 
-    def report_up()
+    def report_up
       zk_save
     end
 

@@ -18,12 +18,10 @@ module Nerve
 
       @name = service['name']
 
-      @zk_key = "#{@instance_id}_#{@name}"
-      @check_interval = opts['check_interval'] || 0.5
-      @last_check = 0
       @expires = false
       @expires_at = Time.now.to_i + 60
-      @sha1 = opts['sha1']
+      @sha1 = service['sha1']
+      @last_check = 0
 
       # configure the reporter, which we use for talking to zookeeper
       @reporter = Reporter.new({
@@ -66,7 +64,7 @@ module Nerve
       log.info "nerve: starting service watch #{@name}"
 
       # begin by reporting down
-      @reporter.start()
+      @reporter.start
       @reporter.report_down
       @was_up = false
     rescue StandardError => e

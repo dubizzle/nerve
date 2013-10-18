@@ -56,21 +56,17 @@ module Nerve
 
       # create service watcher objects
       log.debug 'nerve: creating service watchers'
-      @service_watchers=[]
+      @service_watchers={}
       opts['services'].each do |name, config|
-        @service_watchers << ServiceWatcher.new(config.merge({'instance_id' => @instance_id, 'name' => name}))
+        @service_watchers[name] = ServiceWatcher.new(config.merge({'instance_id' => @instance_id, 'name' => name}))
       end
 
       @ephemeral_service_watchers={}
 
-      # create machine watcher object
-      log.debug 'nerve: creating machine watcher'
-      @machine_check = MachineWatcher.new(opts['machine_check'].merge({'instance_id' => @instance_id}))
-
       @port = opts['listen_port'] || 1025
       @port = @port.to_i
 
-      @expiry = opts['dynamic_service_expiry'] || 60
+      @expiry = opts['ephemeral_service_expiry'] || 60
       @expiry = @expiry.to_i
 
       log.debug 'nerve: completed init'
@@ -88,7 +84,6 @@ module Nerve
 
         EventMachine.run do
           EM.add_periodic_timer(1) {
-            @machine_check.run
             @service_watchers.each do |name,watcher|
               if watcher.expires and Time.now.to_i > watcher.expires_at
                 log.info "removing service watcher for #{name} because it has expired"
@@ -103,7 +98,6 @@ module Nerve
           EventMachine.start_server("127.0.0.1", @port, NerveServer, self)
         end
 
-        @machine_check.close!
         @service_watchers.each do |name,watcher|
           watcher.close!
         end
@@ -117,7 +111,8 @@ module Nerve
     end
 
     def receive(json)
-      json['service_checks'].each do |name,params|
+      next unless json.has_key? 'services'
+      json['services'].each do |name,params|
         sha1 = Digest::SHA1.hexdigest params.to_s
         params = params.merge({'instance_id' => @instance_id, 'name' => name, 'sha1' => sha1})
         port = params['port']
