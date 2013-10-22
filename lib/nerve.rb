@@ -2,6 +2,7 @@ require 'logger'
 require 'json'
 require 'timeout'
 require 'digest/sha1'
+require 'set'
 
 require 'em/pure_ruby'
 require 'eventmachine'
@@ -15,14 +16,24 @@ require 'nerve/service_watcher'
 
 module Nerve
   class NerveServer < EM::Connection
+    include Logging
+    @@connected_clients = Array.new
     def initialize(nerve)
       @nerve = nerve
+      @services = Set.new
+    end
+    def unbind
+      @@connected_clients.delete(self)
+      log.info "TCP client disconnected"
+      @services.each do |key|
+        @nerve.remove_watcher key
+      end
     end
     def receive_data(data)
       # Attempt to parse as JSON
       begin
         json = JSON.parse(data)
-        @nerve.receive(json)
+        @services.merge(@nerve.receive(json))
       rescue JSON::ParserError => e
         # nope!
       rescue => e
@@ -86,9 +97,6 @@ module Nerve
           EM.add_periodic_timer(1) {
             @service_watchers.each do |name,watcher|
               if watcher.expires and Time.now.to_i > watcher.expires_at
-                log.info "removing service watcher for #{name} because it has expired"
-                @service_watchers[name].close!
-                @service_watchers.delete name
                 next
               end
               watcher.run
@@ -110,18 +118,26 @@ module Nerve
       log.info 'nerve: exiting'
     end
 
+    def remove_watcher(key)
+      if @service_watchers.has_key? key
+      log.info "removing service watcher for #{key} because it has expired"
+      @service_watchers[key].close!
+      @service_watchers.delete key
+      else
+        log.warn "can't remove service watcher for #{key} because it's not present"
+      end
+    end
     def receive(json)
-      next unless json.has_key? 'services'
+      return nil unless json.has_key? 'services'
+      services = Set.new
       json['services'].each do |name,params|
         sha1 = Digest::SHA1.hexdigest params.to_s
         params = params.merge({'instance_id' => @instance_id, 'name' => name, 'sha1' => sha1})
         port = params['port']
-        key = "#{@name}_#{params['type']}_#{params['port']}"
+        key = "#{name}_#{params['port']}"
         if @service_watchers.has_key? key
           if @service_watchers[key].sha1 != sha1
-            log.info "removing ephemeral service watcher for #{key}"
-            @service_watchers[key].close!
-            @service_watchers.delete key
+            remove_watcher(key)
           else
             @service_watchers[key].expires_at = Time.now.to_i + @expiry
           end
@@ -138,7 +154,9 @@ module Nerve
             log.info e
           end
         end
+        services.add(key)
       end
+      services.to_a
     end
   end
 end
