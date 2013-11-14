@@ -39,6 +39,7 @@ module Nerve
           end
         rescue Mysql:Error => e
           log.debug "nerve: unable to connect with mysql"
+          return false
         ensure
           conn.close if conn
         end
