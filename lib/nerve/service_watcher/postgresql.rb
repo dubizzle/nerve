@@ -4,8 +4,6 @@ require 'pg'
 module Nerve
   module ServiceCheck
     class PostgreSQLServiceCheck < BaseServiceCheck
-      require 'socket'
-      include Socket::Constants
 
       def initialize(opts={})
         super
