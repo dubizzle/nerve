@@ -19,4 +19,6 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency "zk", "~> 1.9.2"
   gem.add_runtime_dependency "bunny", "= 1.0.0.rc2"
+  gem.add_runtime_dependency "pg", "= 0.17.0"
+  gem.add_runtime_dependency "mysql2", "= 0.3.14"
 end
