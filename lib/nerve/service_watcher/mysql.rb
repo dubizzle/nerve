@@ -8,13 +8,14 @@ module Nerve
       def initialize(opts={})
         super
 
-        raise ArgumentError, "missing required arguments in mysql check" unless opts['port'] and opts['user']
+        %w{port dbname user password}.each do |required|
+          raise ArgumentError, "missing required argument #{required} in mysql check" unless
+            opts[required]
+          instance_variable_set("@#{required}",opts[required])
+        end
 
-        @port = opts['port']
-        @host = opts['host']
-        @dbname = opts['dbname']
-        @user = opts['user']
-        @password = opts['password']
+        @host = opts['host'] || '127.0.0.1'
+        @name = "#{@user}@#{@host}"
       end
 
       def check
@@ -31,14 +32,15 @@ module Nerve
 
           res = conn.query 'SELECT VERSION()'
           data = res.fetch_row
+
           if data
             return true
           else
             log.debug "nerve: mysql failed to responde"
             return false
           end
-        rescue Mysql:Error => e
-          log.debug "nerve: unable to connect with mysql"
+        rescue Mysql::Error => e
+          log.debug "nerve: unable to connect with mysql #{e}"
           return false
         ensure
           conn.close if conn
