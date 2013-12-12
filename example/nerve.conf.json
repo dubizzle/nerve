@@ -46,6 +46,18 @@
           "password": "guest"
         }
       ]
+    },
+    "riak_service": {
+      "host": "127.0.0.1",
+      "http_port": 8098,
+      "zk_hosts": ["localhost:2181"],
+      "zk_path": "/nerve/services/your_riak_service/services",
+      "check_interval": 2,
+      "checks": [
+        {
+          "type": "riak"
+        }
+      ]
     }
   }
 }
