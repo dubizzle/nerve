@@ -9,7 +9,7 @@ module Nerve
         super
 
         @host = opts['host'] || '127.0.0.1'
-        @port = opts ['http_port'] || 8098
+        @port = opts ['port'] || 8098
         @name = "#{@host}:#{@port}"
       end
 
