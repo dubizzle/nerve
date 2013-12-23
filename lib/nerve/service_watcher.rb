@@ -18,7 +18,7 @@ module Nerve
       end
 
       @name = service['name']
-      @enable_leader_election = service['leader_election'] || false
+      @enable_leader_watcher = service.has_key?('leader_watcher')
 
       # configure the reporter, which we use for talking to zookeeper
       @reporter = Reporter.new({
@@ -29,12 +29,12 @@ module Nerve
           'sequential' => service['sequential'] || false
         })
 
-      if @enable_leader_election
+      if @enable_leader_watcher
         # configure the leader watcher
         @leader_watcher = LeaderWatcher.create({
           'hosts' => service['zk_hosts'],
           'path' => service['zk_path'],
-          'name' => service['name'],
+          'name' => service['leader_watcher'],
           'host' => service['host']
         })
       end
@@ -82,7 +82,7 @@ module Nerve
           if is_up
             @reporter.report_up
             log.info "nerve: service #{@name} is now up"
-            if @enable_leader_election
+            if @enable_leader_watcher
               # pass the full key of current node to elect master
               @leader_watcher.start(@reporter.full_key)
             end

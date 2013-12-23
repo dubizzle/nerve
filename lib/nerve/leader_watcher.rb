@@ -6,7 +6,7 @@ module Nerve
 
     @watchers = {
       'base'=>BaseWatcher,
-      'postgresql_service'=>PostgreSQLWatcher,
+      'postgresql'=>PostgreSQLWatcher,
     }
 
     def self.create(opts)
