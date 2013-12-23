@@ -8,6 +8,7 @@ require 'nerve/log'
 require 'nerve/ring_buffer'
 require 'nerve/reporter'
 require 'nerve/service_watcher'
+require 'nerve/leader_watcher'
 
 module Nerve
   class Nerve

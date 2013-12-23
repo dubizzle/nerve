@@ -43,6 +43,10 @@ module Nerve
       return @zk.ping?
     end
 
+    def full_key
+      return @full_key
+    end
+    
     private
 
     def zk_delete
