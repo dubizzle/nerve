@@ -1,12 +1,17 @@
 require 'zk'
 
 module Nerve
-  class PostgreSQLWatcher < BaseWatcher
-    include Logging
-    
-    private
-    def action
-      log.info("I am master? #{@is_master}")
-    end
+	module LeaderWatcher
+	  class PostgreSQLWatcher < BaseWatcher
+	    include Logging
+	    
+	    private
+	    def action
+	      log.info("I am master? #{@is_master}")
+	    end
+	  end
+
+	  WATCHERS ||= {}
+	  WATCHERS['postgresql'] = PostgreSQLWatcher
   end
 end

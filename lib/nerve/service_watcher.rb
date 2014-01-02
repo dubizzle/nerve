@@ -31,7 +31,7 @@ module Nerve
 
       if @enable_leader_watcher
         # configure the leader watcher
-        @leader_watcher = LeaderWatcher.create({
+        @leader_watcher = LeaderWatcher::LeaderWatcherFactory.create({
           'hosts' => service['zk_hosts'],
           'path' => service['zk_path'],
           'name' => service['leader_watcher'],
