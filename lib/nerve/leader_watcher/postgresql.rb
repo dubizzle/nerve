@@ -7,7 +7,7 @@ module Nerve
 	    
 	    private
 	    def action
-	      log.info("I am master? #{@is_master}")
+	      log.info("Am I master? #{master?}")
 	    end
 	  end
 

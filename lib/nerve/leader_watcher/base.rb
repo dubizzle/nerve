@@ -23,16 +23,17 @@ module Nerve
 
       private
 
-      def elect
-        @is_master = false
-        leader = leader_election
+      def master?
+        leader = elect_leader
         if @key == "/#{leader}"
-          @is_master = true
+          return true
+        else
+          return false
         end
       end
 
       def action
-        log.info("I am master? #{@is_master}")
+        log.info("Am I master? #{master?}")
       end
 
       def watch
@@ -42,16 +43,14 @@ module Nerve
 
       def watcher_callback
         @callback ||= Proc.new do |event|
-          # Set new watcher
+          # Set new watcher, since ZK watchers are one-shot handlers to aviod races
           watch
-          # elect master
-          elect
           # perform action
           action
         end
       end
 
-      def leader_election
+      def elect_leader
         begin
           children = @zk.children(@path, :watch => true)
           log.debug("children #{children}")
