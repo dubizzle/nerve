@@ -6,14 +6,14 @@ module Nerve
     class LeaderWatcherFactory
 
       def self.create(opts)
-        %w{name hosts path host}.each do |required|
+        %w{type hosts path host}.each do |required|
           raise ArgumentError, "you need to specify required argument #{required}" unless opts[required]
         end
 
-        raise ArgumentError, "Invalid service name #{opts['name']}" \
-          unless WATCHERS.has_key?(opts['name'])
+        raise ArgumentError, "Invalid watcher type #{opts['type']}" \
+          unless WATCHERS.has_key?(opts['type'])
         
-        return WATCHERS[opts['name']].new(opts)
+        return WATCHERS[opts['type']].new(opts)
       end
     end
   end

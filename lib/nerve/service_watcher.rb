@@ -34,7 +34,7 @@ module Nerve
         @leader_watcher = LeaderWatcher::LeaderWatcherFactory.create({
           'hosts' => service['zk_hosts'],
           'path' => service['zk_path'],
-          'name' => service['leader_watcher'],
+          'type' => service['leader_watcher'],
           'host' => service['host']
         })
       end
