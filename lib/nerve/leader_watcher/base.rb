@@ -21,11 +21,12 @@ module Nerve
         watcher_callback.call
       end
 
-      private
+      def master_node
+        return @master_node
+      end
 
       def master?
-        leader = elect_leader
-        if @key == "/#{leader}"
+        if @key == "/#{@leader}"
           return true
         else
           return false
@@ -33,7 +34,16 @@ module Nerve
       end
 
       def action
-        log.info("Am I master? #{master?}")
+        log.debug("Am I master? #{master?}")
+      end
+
+      private
+
+      def discover
+        @leader = elect_leader
+        node = @zk.get("#{@path}/#{@leader}")
+        @master_node = JSON.parse(node[0])
+        log.debug("Master node: #{@master_node}")
       end
 
       def watch
@@ -45,6 +55,8 @@ module Nerve
         @callback ||= Proc.new do |event|
           # Set new watcher, since ZK watchers are one-shot handlers to aviod races
           watch
+          # discover a leader
+          discover
           # perform action
           action
         end
