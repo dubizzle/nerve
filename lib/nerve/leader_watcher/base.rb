@@ -72,6 +72,10 @@ module Nerve
           log.error("Exception: #{e}")
         end
       end
+
+      def notify
+        log.info("notify stub called")
+      end
     end
 
     WATCHERS ||= {}
