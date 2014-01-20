@@ -19,7 +19,7 @@ module Nerve
                   Subject: #{subject}\n\
                   #{message}"
           result = `echo "#{body}" | sendmail "#{address_to}"`
-          if x != 0
+          if $?.exitstatus != 0
             log.error("Failed to send email")
           else
             log.info("Notification email sent to recipients")
