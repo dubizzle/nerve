@@ -73,7 +73,7 @@ module Nerve
         end
       end
 
-      def notify
+      def notify(*args)
         log.info("notify stub called")
       end
     end
