@@ -13,6 +13,7 @@ module Nerve
         @hosts = opts['hosts']
         @path = opts['path']
         @host = opts['host']
+        @port = opts['port']
       end
 
       def start(key)
@@ -33,11 +34,11 @@ module Nerve
         end
       end
 
+      private
+
       def action
         log.debug("Am I master? #{master?}")
       end
-
-      private
 
       def discover
         @leader = elect_leader
