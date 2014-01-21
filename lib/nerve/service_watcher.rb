@@ -3,6 +3,7 @@ require 'nerve/service_watcher/http'
 require 'nerve/service_watcher/rabbitmq'
 require 'nerve/service_watcher/postgresql'
 require 'nerve/service_watcher/mysql'
+require 'nerve/service_watcher/redis'
 
 module Nerve
   class ServiceWatcher
