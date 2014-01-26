@@ -37,7 +37,8 @@ module Nerve
           'path' => service['zk_path'],
           'type' => service['leader_watcher'],
           'host' => service['host'],
-          'port' => service['port']
+          'port' => service['port'],
+          'service_home' => service['service_home']
         })
       end
 

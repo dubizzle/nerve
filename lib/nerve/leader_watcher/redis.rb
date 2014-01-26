@@ -3,16 +3,29 @@ module Nerve
     class RedisWatcher < BaseWatcher
       include Logging
 
+      def initialize(opts={})
+        %w{hosts path host port service_home}.each do |required|
+          raise ArgumentError, "you need to specify required argument #{required}" unless opts[required]
+        end
+
+        @hosts = opts['hosts']
+        @path = opts['path']
+        @host = opts['host']
+        @port = opts['port']
+        @service_home = opts['service_home']
+      end
+
       private
       def action
         log.info("Am I master? #{master?}")
-        log.info("Hello! #{master_node}")
         if master?
-          res = `echo "master"`
+          command = "sudo su - vagrant -c  '/opt/smartstack/nerve/redis_master_config.sh #{@service_home} #{@host} #{@port}'"
         else
-          res = `echo "slave"`
+          command = "sudo su - vagrant -c  '/opt/smartstack/nerve/redis_slave_config.sh #{@service_home} #{master_node["host"]} #{master_node["port"]} #{@host} #{@port}'"
         end
-        log.info(res)
+        log.debug "#{command}"
+        res = `#{command}`
+        log.info("redis response #{res}")
       end
     end
 

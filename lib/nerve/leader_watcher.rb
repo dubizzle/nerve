@@ -1,5 +1,6 @@
 require_relative "./leader_watcher/base"
 require_relative "./leader_watcher/postgresql"
+require_relative "./leader_watcher/redis"
 
 module Nerve
   module LeaderWatcher
