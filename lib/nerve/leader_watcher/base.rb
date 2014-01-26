@@ -13,6 +13,8 @@ module Nerve
         @hosts = opts['hosts']
         @path = opts['path']
         @host = opts['host']
+        @SLAVE_STATE = ENV['SLAVE_STATE']
+        @MASTER_STATE = ENV['MASTER_STATE']
       end
 
       def start(key)
@@ -36,6 +38,41 @@ module Nerve
       def action
         log.debug("Am I master? #{master?}")
       end
+
+      def previous_state
+        begin
+          file = File.open("#{ENV['PG_STATE_FILE']}")
+          state = file.gets
+        rescue
+          log.info("Failed to open state file assuming new node")
+          state = ''
+        end
+        return state
+      end
+
+      def node_state_update
+          case previous_state
+            when ''
+                if master?
+                    state_update = 'PROMOTED'
+                    log.debug("New Node. Setting as  #{@MASTER_STATE}")
+                else
+                    state_update = 'DEMOTED'
+                    log.debug("New Node. Setting as  #{@SLAVE_STATE}")
+            when @MASTER_STATE
+                if master?
+                    state_update = 'NO_CHANGE'
+                    log.info("Node staying as master")
+                else
+                    state_update = 'DEMOTED'
+                    log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
+            when @SLAVE_STATE
+                if master?
+                    state_upate = 'PROMOTED'
+                    log.error("FAILOVER. Prompting node to #{@MASTER_STATE}")
+                else
+                    state_update = 'NO_CHANGE'
+                    log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
 
       private
 
