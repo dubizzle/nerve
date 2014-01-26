@@ -1,4 +1,5 @@
 require 'zk'
+require_relative '../common'
 
 module Nerve
   module LeaderWatcher
@@ -54,24 +55,24 @@ module Nerve
           case previous_state
             when ''
                 if master?
-                    state_update = 'PROMOTED'
+                    state_update = StatusChange::PROMOTED
                     log.debug("New Node. Setting as  #{@MASTER_STATE}")
                 else
-                    state_update = 'DEMOTED'
+                    state_update = StatusChange::DEMOTED
                     log.debug("New Node. Setting as  #{@SLAVE_STATE}")
             when @MASTER_STATE
                 if master?
-                    state_update = 'NO_CHANGE'
+                    state_update = StatusChange::NO_CHANGE
                     log.info("Node staying as master")
                 else
-                    state_update = 'DEMOTED'
+                    state_update = StatusChange::DEMOTED
                     log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
             when @SLAVE_STATE
                 if master?
-                    state_upate = 'PROMOTED'
+                    state_upate = StatusChange::PROMOTED
                     log.error("FAILOVER. Prompting node to #{@MASTER_STATE}")
                 else
-                    state_update = 'NO_CHANGE'
+                    state_update = StatusChange.NO_CHANGE
                     log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
 
       private
