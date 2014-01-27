@@ -14,8 +14,8 @@ module Nerve
         @hosts = opts['hosts']
         @path = opts['path']
         @host = opts['host']
-        @SLAVE_STATE = ENV['SLAVE_STATE']
-        @MASTER_STATE = ENV['MASTER_STATE']
+        @SLAVE_STATE = 'slave'
+        @MASTER_STATE = 'master'
       end
 
       def start(key)
@@ -42,7 +42,7 @@ module Nerve
 
       def previous_state
         begin
-          file = File.open("#{ENV['PG_STATE_FILE']}")
+          file = File.open("#{Dir.home}/pg.state")
           state = file.gets
         rescue
           log.info("Failed to open state file assuming new node")
@@ -72,7 +72,7 @@ module Nerve
                     state_upate = StatusChange::PROMOTED
                     log.error("FAILOVER. Prompting node to #{@MASTER_STATE}")
                 else
-                    state_update = StatusChange.NO_CHANGE
+                    state_update = StatusChange::NO_CHANGE
                     log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
 
       private
