@@ -37,8 +37,10 @@ module Nerve
           'path' => service['zk_path'],
           'type' => service['leader_watcher'],
           'host' => service['host'],
-          'port' => service['port'],
           'service_home' => service['service_home']
+          'port' => service['port']
+          'failover_path' => service['failover_path'],
+          'failover_interval' => service['failover_interval'] || 3600
         })
       end
 
