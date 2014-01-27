@@ -1,5 +1,5 @@
 require 'zk'
-require_relative '../common'
+require_relative 'common'
 require_relative '../email'
 
 module Nerve
@@ -10,9 +10,8 @@ module Nerve
       def initialize(opts={})
         %w{hosts path host failover_path}.each do |required|
           raise ArgumentError, "you need to specify required argument #{required}" unless opts[required]
-          @email = Email::new
-      end
-
+        end
+        @email = Email::new
         @hosts = opts['hosts']
         @path = opts['path']
         @host = opts['host']
@@ -47,18 +46,21 @@ module Nerve
         should_failover = last_state == @SLAVE_STATE && master ? true : false
 
         if should_failover
-            if !zk.exists(@failover_path)?
-                zk.create(@failover_path, :data => '')
-            else
-                zk.set(@failover_path, :data => '')
-
-            if last_failover > @FAILOVER_INTERVAL
-                log.info("Should failover")
-                return true
-            else
-                log.info("Failing over too often. Not going to.")
-                return false
+          if zk.exists(@failover_path)
+            zk.set(@failover_path, :data => '')
+          else
+            zk.create(@failover_path, :data => '')
+          end
         end
+
+        if last_failover > @FAILOVER_INTERVAL
+          log.info("Should failover")
+          return true
+        else
+          log.info("Failing over too often. Not going to.")
+          return false
+        end
+      end
 
       private
 
@@ -79,37 +81,44 @@ module Nerve
       end
 
       def node_state_update
-          case previous_state
-            when ''
-                if master?
-                    state_update = StatusChange::PROMOTED
-                    log.debug("New Node. Setting as  #{@MASTER_STATE}")
-                else
-                    state_update = StatusChange::DEMOTED
-                    log.debug("New Node. Setting as  #{@SLAVE_STATE}")
-            when @MASTER_STATE
-                if master?
-                    state_update = StatusChange::NO_CHANGE
-                    log.info("Node staying as master")
-                else
-                    state_update = StatusChange::DEMOTED
-                    log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
-            when @SLAVE_STATE
-                if master?
-                    state_upate = StatusChange::PROMOTED
-                    log.error("FAILOVER. Prompting node to #{@MASTER_STATE}")
-                else
-                    state_update = StatusChange::NO_CHANGE
-                    log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
+        case previous_state
+          when ''
+            if master?
+              state_update = StatusChange::PROMOTED
+              log.debug("New Node. Setting as  #{@MASTER_STATE}")
+            else
+              state_update = StatusChange::DEMOTED
+              log.debug("New Node. Setting as  #{@SLAVE_STATE}")
+            end
+          when @MASTER_STATE
+            if master?
+              state_update = StatusChange::NO_CHANGE
+              log.info("Node staying as master")
+            else
+              state_update = StatusChange::DEMOTED
+              log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
+            end
+          when @SLAVE_STATE
+            if master?
+              state_upate = StatusChange::PROMOTED
+              log.error("FAILOVER. Prompting node to #{@MASTER_STATE}")
+            else
+              state_update = StatusChange::NO_CHANGE
+              log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
+            end
+        end
+      end
 
       def last_failover
         begin
-            node = @zk.get("#{failover_path}")
-            last_modified = node[1].last_modified_time
-            return Time.now.to_i - last_modified / 1000
+          node = @zk.get("#{failover_path}")
+          last_modified = node[1].last_modified_time
+          return Time.now.to_i - last_modified / 1000
         rescue
-            log.info("Not failed over yet")
-            return -1
+          log.info("Not failed over yet")
+          return -1
+        end
+      end
 
       def discover
         @leader = elect_leader

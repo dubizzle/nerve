@@ -1,5 +1,5 @@
 require 'zk'
-require_relative '../common'
+require_relative 'common'
 
 module Nerve
   module LeaderWatcher
@@ -15,6 +15,7 @@ module Nerve
             log.info("Not failing over")
             notify("Not Failing over", "Failover time less than interval. Something is wrong!")
             return
+        end
 
         if new_node_state != StatusChange::NO_CHANGE
           if new_node_state == StatusChange::PROMOTED
