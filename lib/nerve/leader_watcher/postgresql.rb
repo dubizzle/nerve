@@ -1,4 +1,3 @@
-require 'zk'
 require_relative 'common'
 
 module Nerve
