@@ -10,7 +10,7 @@ module Nerve
       def initialize(opts={})
         %w{hosts path host failover_path}.each do |required|
           raise ArgumentError, "you need to specify required argument #{required}" unless opts[required]
-          @email = Email::new
+        @email = Email::new
       end
 
         @hosts = opts['hosts']
