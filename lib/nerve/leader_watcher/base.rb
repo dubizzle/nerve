@@ -47,6 +47,11 @@ module Nerve
         should_failover = last_state == @SLAVE_STATE && master ? true : false
 
         if should_failover
+            if !zk.exists(@failover_path)?
+                zk.create(@failover_path, :data => '')
+            else
+                zk.set(@failover_path, :data => '')
+
             if last_failover > @FAILOVER_INTERVAL
                 log.info("Should failover")
                 return true
