@@ -6,7 +6,7 @@ module Nerve
     class LeaderWatcherFactory
 
       def self.create(opts)
-        %w{type hosts path host}.each do |required|
+        %w{type hosts path host port}.each do |required|
           raise ArgumentError, "you need to specify required argument #{required}" unless opts[required]
         end
 

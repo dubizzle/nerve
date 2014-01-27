@@ -16,6 +16,7 @@ module Nerve
         @hosts = opts['hosts']
         @path = opts['path']
         @host = opts['host']
+        @port = opts['port']
         @failover_path = opts['failover_path']
         @SLAVE_STATE = 'slave'
         @MASTER_STATE = 'master'
@@ -40,10 +41,6 @@ module Nerve
         end
       end
 
-      def action
-        log.debug("Am I master? #{master?}")
-      end
-
       def failover
         last_state = previous_state
         new_node_state = node_state_update
@@ -59,6 +56,12 @@ module Nerve
         end
 
       private
+
+      def action
+        log.debug("Am I master? #{master?}")
+      end
+
+
       def previous_state
         begin
           file = File.open("#{Dir.home}/pg.state")
