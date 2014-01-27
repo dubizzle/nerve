@@ -157,7 +157,7 @@ module Nerve
       #TODO: allow variable arguement list: only take 2 of 4 now
       def notify(*args)
         log.info("notify stub called")
-        email.send_email(args[0], args[1])
+        @email.send_email(args[0], args[1])
       end
     end
 
