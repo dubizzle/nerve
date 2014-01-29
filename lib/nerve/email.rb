@@ -6,7 +6,7 @@ module Nerve
     include Logging
 
     def initialize(address_from = 'watcher@dubizzle.com',
-                   address_to = 'seb@dubizzle.com,qasim@dubizzle.com,aamir@dubizzle.com')
+                   address_to = 'central@postman.dubizzle.com')
       @address_from = address_from
       @address_to = address_to
       @pool = Pool.new(10)
@@ -17,9 +17,7 @@ module Nerve
                    address_from = @address_from,
                    address_to = @address_to)
         @pool.schedule do
-          body = "From: #{address_from}\n\
-                  Subject: #{subject}\n\
-                  #{message}"
+          body = "From: #{address_from}\nSubject: #{subject}\n#{message}"
           result = `echo "#{body}" | sendmail "#{address_to}"`
           if $?.exitstatus != 0
             log.error("Failed to send email")

@@ -20,6 +20,7 @@ module Nerve
         @SLAVE_STATE = 'slave'
         @MASTER_STATE = 'master'
         @FAILOVER_INTERVAL = opts['failover_interval']
+        @service_home = opts['service_home']
       end
 
       def start(key)
@@ -40,26 +41,23 @@ module Nerve
         end
       end
 
-      def failover
-        last_state = previous_state
-        new_node_state = node_state_update
-        should_failover = last_state == @SLAVE_STATE && master ? true : false
+      def terminate_failover(state)
+        should_failover = state == @SLAVE_STATE && master? ? true : false
+        log.info "[#{@port}] Last State: #{state} Failover: #{should_failover}"
 
         if should_failover
-          if zk.exists(@failover_path)
-            zk.set(@failover_path, :data => '')
+          failover_time = last_failover
+          log.info "----------------> #{failover_time}"
+          if failover_time > 0 and failover_time < @FAILOVER_INTERVAL
+            log.info("[#{@port}] Should not failover and terminate")
+            return true
           else
-            zk.create(@failover_path, :data => '')
+            log.info("[#{@port}] Should failover and not terminate")
+            @zk.set("#{@failover_path}", '')
+            return false
           end
         end
-
-        if last_failover > @FAILOVER_INTERVAL
-          log.info("Should failover")
-          return true
-        else
-          log.info("Failing over too often. Not going to.")
-          return false
-        end
+        return false
       end
 
       private
@@ -68,54 +66,58 @@ module Nerve
         log.debug("Am I master? #{master?}")
       end
 
-
       def previous_state
         begin
-          file = File.open("#{Dir.home}/pg.state")
+          file = File.open("/tmp/#{@host}_#{@port}.state")
           state = file.gets
-        rescue
-          log.info("Failed to open state file assuming new node")
+        rescue Exception => e
+          log.info("Failed to open state file assuming new node #{e}")
           state = ''
         end
-        return state
+        return state.strip
       end
 
-      def node_state_update
-        case previous_state
-          when ''
-            if master?
-              state_update = StatusChange::PROMOTED
-              log.debug("New Node. Setting as  #{@MASTER_STATE}")
-            else
-              state_update = StatusChange::DEMOTED
-              log.debug("New Node. Setting as  #{@SLAVE_STATE}")
-            end
-          when @MASTER_STATE
-            if master?
-              state_update = StatusChange::NO_CHANGE
-              log.info("Node staying as master")
-            else
-              state_update = StatusChange::DEMOTED
-              log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
-            end
-          when @SLAVE_STATE
-            if master?
-              state_upate = StatusChange::PROMOTED
-              log.error("FAILOVER. Prompting node to #{@MASTER_STATE}")
-            else
-              state_update = StatusChange::NO_CHANGE
-              log.info("Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
-            end
+      def node_state_update(state)
+        case state
+        when ''
+          if master?
+            state_update = StatusChange::PROMOTED
+            log.info("[#{@port}] New Node. Setting as  #{@MASTER_STATE}")
+          else
+            state_update = StatusChange::DEMOTED
+            log.info("[#{@port}] New Node. Setting as  #{@SLAVE_STATE}")
+          end
+        when @MASTER_STATE
+          if master?
+            state_update = StatusChange::NO_CHANGE
+            log.info("[#{@port}] Node staying as master")
+          else
+            state_update = StatusChange::DEMOTED
+            log.info("[#{@port}] Node demoted from #{@MASTER_STATE} -> #{@SLAVE_STATE}")
+          end
+        when @SLAVE_STATE
+          if master?
+            state_update = StatusChange::PROMOTED
+            log.info("[#{@port}] FAILOVER. Promoting node to #{@MASTER_STATE}")
+          else
+            state_update = StatusChange::DEMOTED
+            log.info("[#{@port}] Node staying as slave")
+          end
+        else
+          state_update = StatusChange::NO_CHANGE
+          log.error "[#{@port}] Invalid node state!"
         end
+        return state_update
       end
 
       def last_failover
         begin
-          node = @zk.get("#{failover_path}")
+          node = @zk.get("#{@failover_path}")
           last_modified = node[1].last_modified_time
           return Time.now.to_i - last_modified / 1000
         rescue
           log.info("Not failed over yet")
+          @zk.create("#{@failover_path}", :data => '')
           return -1
         end
       end
