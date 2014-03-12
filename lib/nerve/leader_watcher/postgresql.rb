@@ -7,7 +7,7 @@ module Nerve
       
       private
       def action
-        log.info("Am I master? #{master?} last state: #{last_state}")
+        log.info("Am I master? #{master?}")
         log.info("Hello! #{master_node}")
   
         if !failover
