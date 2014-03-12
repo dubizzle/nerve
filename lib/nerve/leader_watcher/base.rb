@@ -68,7 +68,7 @@ module Nerve
 
       def previous_state
         begin
-          file = File.open("/tmp/#{@host}_#{@port}.state")
+          file = File.open("/tmp/pg.state")
           state = file.gets
         rescue Exception => e
           log.info("Failed to open state file assuming new node #{e}")
