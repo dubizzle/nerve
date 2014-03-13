@@ -3,7 +3,8 @@ module Nerve
     class StatusChange
       DEMOTED=-1
       NO_CHANGE=0
-      PROMOTED=1
+      STARTUP=1
+      PROMOTED=2
     end
   end
 end

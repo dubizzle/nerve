@@ -81,7 +81,7 @@ module Nerve
         case state
         when ''
           if master?
-            state_update = StatusChange::PROMOTED
+            state_update = StatusChange::STARTUP
             log.info("[#{@port}] New Node. Setting as  #{@MASTER_STATE}")
           else
             state_update = StatusChange::DEMOTED
