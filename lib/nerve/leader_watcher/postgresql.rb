@@ -24,11 +24,11 @@ module Nerve
             command = "sudo /bin/su - postgres -c 'touch /var/lib/postgresql/9.3/main/postgresql.trigger'"
           else
             ss = 'slave'
-            command = "sudo su - postgres -c '/opt/smartstack/nerve/postgres_slave_config.sh #{master_node["host"]} #{master_node["port"]}'"
+            command = "sudo /bin/su - postgres -c '/opt/smartstack/nerve/postgres_slave_config.sh #{master_node["host"]} #{master_node["port"]}'"
           end
           log.info "---> Previous State #{state} Is master? #{master?} Port: #{@port} Status: #{new_node_state} Command: #{command}"
           res = `#{command}`
-          aa = `echo #{ss} > /tmp/pg.state && echo '#{@host} #{@port} #{Time.now.to_f} #{ss}' >> /tmp/status.log`
+          aa = `sudo /bin/su - postgres -c 'echo #{ss} > /tmp/pg.state' && echo '#{@host} #{@port} #{Time.now.to_f} #{ss}' >> /tmp/status.log`
           log.info("redis response #{res}")
         end
       end
