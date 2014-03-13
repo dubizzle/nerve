@@ -20,7 +20,7 @@ module Nerve
             ss = 'master'
             command = "sudo /bin/su - postgres -c '/opt/smartstack/nerve/postgres_master_config.sh'"
           elsif new_node_state == StatusChange::PROMOTED
-            ss = 'promoted to master'
+            ss = 'master'
             command = "sudo /bin/su - postgres -c 'touch /var/lib/postgresql/9.3/main/postgresql.trigger'"
           else
             ss = 'slave'
@@ -28,7 +28,7 @@ module Nerve
           end
           log.info "---> Previous State #{state} Is master? #{master?} Port: #{@port} Status: #{new_node_state} Command: #{command}"
           res = `#{command}`
-          aa = `echo #{ss} > /tmp/#{@host}_#{@port}.state && echo '#{@host} #{@port} #{Time.now.to_f} #{ss}' >> /tmp/status.log`
+          aa = `echo #{ss} > /tmp/pg.state && echo '#{@host} #{@port} #{Time.now.to_f} #{ss}' >> /tmp/status.log`
           log.info("redis response #{res}")
         end
       end
