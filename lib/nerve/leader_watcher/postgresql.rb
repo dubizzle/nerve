@@ -19,9 +19,6 @@ module Nerve
           if new_node_state == StatusChange::STARTUP
             ss = 'master'
             command = "sudo /bin/su - postgres -c '/opt/smartstack/nerve/postgres_master_config.sh'"
-          elsif new_node_state == StatusChange::PROMOTED
-            ss = 'master'
-            command = "sudo /bin/su - postgres -c 'touch /var/lib/postgresql/9.3/main/postgresql.trigger'"
           else
             ss = 'slave'
             command = "sudo /bin/su - postgres -c '/opt/smartstack/nerve/postgres_slave_config.sh #{master_node["host"]} #{master_node["port"]}'"
