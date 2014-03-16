@@ -16,7 +16,7 @@ module Nerve
 
         new_node_state = node_state_update(state)
         if new_node_state != StatusChange::NO_CHANGE
-          if new_node_state == StatusChange::STARTUP
+          if new_node_state == StatusChange::PROMOTED
             ss = 'master'
             command = "sudo /bin/su - postgres -c '/opt/smartstack/nerve/postgres_master_config.sh'"
           else
