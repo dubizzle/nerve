@@ -21,6 +21,8 @@ module Nerve
         @MASTER_STATE = 'master'
         @FAILOVER_INTERVAL = opts['failover_interval']
         @service_home = opts['service_home']
+        @previous_leader = ''
+        @previous_state = ''
       end
 
       def start(key)
@@ -100,8 +102,12 @@ module Nerve
             state_update = StatusChange::PROMOTED
             log.info("[#{@port}] FAILOVER. Promoting node to #{@MASTER_STATE}")
           else
-            state_update = StatusChange::DEMOTED
+            state_update = StatusChange::NO_CHANGE
             log.info("[#{@port}] Node staying as slave")
+            if @previous_leader != @leader
+              state_update = StatusChange::DEMOTED
+              log.info("[#{@port}] New master is elected so demoting it")
+            end
           end
         else
           state_update = StatusChange::NO_CHANGE
@@ -123,7 +129,8 @@ module Nerve
       end
 
       def discover
-        @leader = elect_leader
+        @previous_leader = @leader
+        @leader = elect_leader            
         node = @zk.get("#{@path}/#{@leader}")
         @master_node = JSON.parse(node[0])
         log.debug("Master node: #{@master_node}")
