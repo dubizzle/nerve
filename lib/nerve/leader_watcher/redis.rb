@@ -2,7 +2,7 @@ require_relative 'common'
 
 module Nerve
   module LeaderWatcher
-    class PostgreSQLWatcher < BaseWatcher
+    class RedisWatcher < BaseWatcher
       include Logging
 
       private
@@ -18,20 +18,20 @@ module Nerve
         if new_node_state != StatusChange::NO_CHANGE
           if new_node_state == StatusChange::PROMOTED
             ss = 'master'
-            command = "sudo /bin/su - postgres -c '/opt/smartstack/nerve/postgres_master_config.sh'"
+            command = "sudo su - vagrant -c  '/opt/smartstack/nerve/redis_master_config.sh #{@service_home} #{@host} #{@port}'"
           else
             ss = 'slave'
-            command = "sudo /bin/su - postgres -c '/opt/smartstack/nerve/postgres_slave_config.sh #{master_node["host"]} #{master_node["port"]}'"
+            command = "sudo su - vagrant -c  '/opt/smartstack/nerve/redis_slave_config.sh #{@service_home} #{master_node["host"]} #{master_node["port"]} #{@host} #{@port}'"
           end
           log.info "---> Previous State #{state} Is master? #{master?} Port: #{@port} Status: #{new_node_state} Command: #{command}"
           res = `#{command}`
-          aa = `sudo /bin/su - postgres -c 'echo #{ss} > /tmp/pg.state' && echo '#{@host} #{@port} #{Time.now.to_f} #{ss}' >> /tmp/status.log`
+          aa = `echo #{ss} > /tmp/#{@host}_#{@port}.state && echo '#{@host} #{@port} #{Time.now.to_f} #{ss}' >> /tmp/status.log`
           log.info("redis response #{res}")
         end
       end
     end
 
     WATCHERS ||= {}
-    WATCHERS['postgresql'] = PostgreSQLWatcher
+    WATCHERS['redis'] = RedisWatcher
   end
 end

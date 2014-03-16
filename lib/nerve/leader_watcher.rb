@@ -1,12 +1,13 @@
 require_relative "./leader_watcher/base"
 require_relative "./leader_watcher/postgresql"
+require_relative "./leader_watcher/redis"
 
 module Nerve
   module LeaderWatcher
     class LeaderWatcherFactory
 
       def self.create(opts)
-        %w{type hosts path host}.each do |required|
+        %w{type hosts path host port}.each do |required|
           raise ArgumentError, "you need to specify required argument #{required}" unless opts[required]
         end
 

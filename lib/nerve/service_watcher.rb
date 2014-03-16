@@ -3,6 +3,7 @@ require 'nerve/service_watcher/http'
 require 'nerve/service_watcher/rabbitmq'
 require 'nerve/service_watcher/postgresql'
 require 'nerve/service_watcher/mysql'
+require 'nerve/service_watcher/redis'
 
 module Nerve
   class ServiceWatcher
@@ -35,7 +36,11 @@ module Nerve
           'hosts' => service['zk_hosts'],
           'path' => service['zk_path'],
           'type' => service['leader_watcher'],
-          'host' => service['host']
+          'host' => service['host'],
+          'service_home' => service['service_home'],
+          'port' => service['port'],
+          'failover_path' => service['failover_path'],
+          'failover_interval' => service['failover_interval'] || 3600
         })
       end
 

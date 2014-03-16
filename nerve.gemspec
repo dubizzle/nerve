@@ -19,4 +19,7 @@ Gem::Specification.new do |gem|
 
   gem.add_runtime_dependency "zk", "~> 1.9.2"
   gem.add_runtime_dependency "bunny", "= 1.0.0.rc2"
+  gem.add_runtime_dependency "thread", "=0.1.3"
+  gem.add_runtime_dependency "redis"
+  gem.add_runtime_dependency "mail"
 end
