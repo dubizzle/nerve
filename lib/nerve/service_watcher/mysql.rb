@@ -5,7 +5,7 @@ module Nerve
     class MySQLServiceCheck < BaseServiceCheck
 
       def initialize(opts={})
-        super
+        super(opts)
 
         %w{port dbname user password}.each do |required|
           raise ArgumentError, "missing required argument #{required} in mysql check" unless
